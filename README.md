@@ -48,11 +48,13 @@ Looking for alternatives to **EasyMotion**, **Jumpy**, **Jumpy2**, or **AceJump*
 ### Install from VS Code Marketplace
 
 **Method 1: Direct Install** (Recommended)
+
 1. [Click here to install Flash Nvim for VSCode](https://marketplace.visualstudio.com/items?itemName=souravahmed.flash-vscode-latest) directly from the VS Code Marketplace
 2. Click the "Install" button
 3. VS Code will open and install the extension automatically
 
 **Method 2: Install from VS Code**
+
 1. Open Visual Studio Code
 2. Go to the Extensions view (`Ctrl+Shift+X` on Windows/Linux or `Cmd+Shift+X` on macOS)
 3. Search for **"flash nvim for vscode"** or **"flash vscode"**
@@ -61,6 +63,7 @@ Looking for alternatives to **EasyMotion**, **Jumpy**, **Jumpy2**, or **AceJump*
 6. Reload VS Code if prompted
 
 **Method 3: Command Line**
+
 ```bash
 code --install-extension souravahmed.flash-vscode-latest
 ```
@@ -87,8 +90,9 @@ code --install-extension souravahmed.flash-vscode-latest
    - **Auto-scroll**: If all matches are outside the visible range, Flash automatically scrolls to show the nearest match - no manual scrolling needed!
    - Press `alt+f` or `alt+shift+f` then `enter` to search previously entered query.
    - Select text and press `alt+f` or `alt+shift+f` then `enter` to search and mark the selected text.
-   - Press `alt+f` then `alt+enter` to mark all symbols (functions, classes, variables) in the current file.
-   - Press `alt+f` (or any active flash mode) then `shift+alt+enter` for treesitter-style selection - marks hierarchical syntactic scopes (expressions, statements, blocks) around cursor for smart selection.
+   - Press `shift+alt+enter` to mark all symbols (functions, classes, variables) in the current file.
+   - Press `alt+enter` for treesitter-style selection - marks hierarchical syntactic scopes (expressions, statements, blocks) around cursor for smart selection.
+   - Press `alt+j` or `alt+k` to mark all the next line or previous line.
 
      ![flash enter](https://github.com/user-attachments/assets/e2f932e3-73c6-4acd-9d8c-9937bb116821)
 
@@ -105,31 +109,34 @@ code --install-extension souravahmed.flash-vscode-latest
   <source src="https://github.com/Sourav9063/flash-nvim-for-vscode/raw/refs/heads/main/assets/513752343-5b5e6205-204a-4a52-ad81-fbb328094156.mov" type="video/mp4"/>
 </video>
 
-| Treesitter Label | Treesitter Selection |
-| :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
+|                                                                  Treesitter Label                                                                   |                                                                Treesitter Selection                                                                 |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------: |
 | <img width="624" alt="Screenshot 2025-11-13 at 2 11 14 PM" src="https://github.com/user-attachments/assets/b317f631-e20a-4948-90b2-bd88cdfb55ef" /> | <img width="624" alt="Screenshot 2025-11-13 at 2 11 31 PM" src="https://github.com/user-attachments/assets/b63c4987-9d73-4995-914a-4b6ceddbdfd6" /> |
 
-   **Dramatically reduce the friction of selecting, cutting, and copying code.** No more tedious click-dragging, Shift+Arrow key combos, or hunting for scope boundaries!
+**Dramatically reduce the friction of selecting, cutting, and copying code.** No more tedious click-dragging, Shift+Arrow key combos, or hunting for scope boundaries!
 
-   **Symbol Navigation** (`alt+enter`):
-   - **Instantly jump to and select any function, class, or variable** in your file
-   - Press `alt+f` → `alt+enter` to label all symbols
-   - Hit a label key to select the **entire symbol definition** (from start to end)
-   - Perfect for: Quickly selecting functions to cut/copy/refactor
+**Symbol Navigation** (`alt+enter`):
 
-   **Treesitter Selection** (`shift+alt+enter`):
-   - **The fastest way to select code scopes** - expressions, statements, blocks, functions
-   - Press `alt+f` (or any active flash mode) → `shift+alt+enter`
-   - Labels appear on **both opening and closing boundaries** (`{` and `}`, function start/end, etc.)
-   - Includes **sticky scroll context** - parent scopes visible at the top
-   - Select a label to **automatically select the entire scope**
-   - No more manual "find the matching brace" - LSP knows your code structure!
+- **Instantly jump to and select any function, class, or variable** in your file
+- Press `alt+f` → `alt+enter` to label all symbols
+- Hit a label key to select the **entire symbol definition** (from start to end)
+- Perfect for: Quickly selecting functions to cut/copy/refactor
 
-   **Why this matters for daily programming:**
-   - Want to copy a function? `alt+f` → `alt+enter` → hit the label → `Ctrl+C` ✅
-   - Need to select an if-block? `shift+alt+enter` → hit the label → Done ✅
-   - Refactoring nested code? Jump between scope boundaries instantly ✅
-   - **Turns 10+ keystrokes into 2-3 keystrokes** for common selection tasks
+**Treesitter Selection** (`shift+alt+enter`):
+
+- **The fastest way to select code scopes** - expressions, statements, blocks, functions
+- Press `alt+f` (or any active flash mode) → `shift+alt+enter`
+- Labels appear on **both opening and closing boundaries** (`{` and `}`, function start/end, etc.)
+- Includes **sticky scroll context** - parent scopes visible at the top
+- Select a label to **automatically select the entire scope**
+- No more manual "find the matching brace" - LSP knows your code structure!
+
+**Why this matters for daily programming:**
+
+- Want to copy a function? `alt+f` → `alt+enter` → hit the label → `Ctrl+C` ✅
+- Need to select an if-block? `shift+alt+enter` → hit the label → Done ✅
+- Refactoring nested code? Jump between scope boundaries instantly ✅
+- **Turns 10+ keystrokes into 2-3 keystrokes** for common selection tasks
 
 4. **Selection:**
 
@@ -137,13 +144,13 @@ code --install-extension souravahmed.flash-vscode-latest
 
      ![flash select](https://github.com/user-attachments/assets/e3a12392-3ab5-4ff7-a657-f28c4b09da2d)
 
-3. **Preview**
+5. **Preview**
+
    - Added a preview in status bar.
-     
+
      <img width="380" height="231" alt="image" src="https://github.com/user-attachments/assets/61c93756-6323-47f1-acbe-d92ba961601b" />
 
-
-4. **Cancel Navigation:**
+6. **Cancel Navigation:**
    - Press `Backspace` to remove the last character of your query, or press `Escape` to exit jump mode.
 
 ## Configuration
@@ -213,7 +220,7 @@ This configuration triggers Flash VSCode when you press `s` or `S` in normal mod
 - [Jumpy2](https://marketplace.visualstudio.com/items?itemName=DavidLGoldberg.jumpy2) for some of the implementation details.
 - [flash.vscode](https://github.com/cunbidun/flash.vscode) flash.vscode(latest) extension is supper set of this extension.
 - [CVim-PR](https://github.com/VSCodeVim/Vim/issues/8567) [CVim](https://github.com/cuixiaorui/vscodeVim/tree/flash) for ux improvement ideas.
- 
+
 ## Keywords & Search Terms
 
 **Popular Searches**: flash.nvim, flash nvim, flash.nvim vscode, flash nvim vscode, flash vscode, flash.vscode, neovim, nvim, vim navigation, vscode navigation, code jump, label jump, easymotion alternative, jumpy alternative, acejump alternative, quick navigation, cursor jump, code navigation extension, vscode jump to, fast navigation, keyboard navigation, vim motions, vscodevim extension, neovim vscode, vim for vscode, treesitter vscode, smart selection, scope selection, symbol navigation, code scope selection
