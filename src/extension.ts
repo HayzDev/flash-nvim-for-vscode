@@ -692,7 +692,7 @@ export function activate(context: vscode.ExtensionContext) {
 			case flashVscodeModes.symbol:
 				handleSymbol();
 				return;
-			case 'symbolSelection':
+			case 'treesitterSelection':
 				handleSymbolSelection();
 				return;
 			case flashVscodeModes.lineUp:
@@ -739,7 +739,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let allChars = searchChars.split('').concat([ 'space', 'symbolSelection', ...Object.values(flashVscodeModes) ]);
+	let allChars = searchChars.split('').concat([ 'space', 'treesitterSelection', ...Object.values(flashVscodeModes) ]);
 	context.subscriptions.push(configChangeListener, start, startSelection, exit, backspaceHandler, visChange,
 		...allChars.map(c => vscode.commands.registerCommand(`flash-vscode.jump.${c}`, () => handleInput(c)))
 	);
