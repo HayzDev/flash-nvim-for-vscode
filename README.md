@@ -38,6 +38,7 @@
 - **👥 For Everyone**: **No Vim knowledge required** - great for all developers
 - **🔥 Battle-Tested**: Based on Neovim's most loved navigation plugin
 - **🎨 Highly Customizable**: Adjust colors, labels, and behavior to your preference
+- **Vim Jumplist Integration**: Uses VSCodeVim's jumplist when jumping, ensuring `''` and `ctrl+o` work as expected.
 
 ### Perfect Alternative To
 

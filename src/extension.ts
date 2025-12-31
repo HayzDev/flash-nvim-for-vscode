@@ -505,7 +505,15 @@ export function activate(context: vscode.ExtensionContext) {
 		// Initial highlight update (just grey out everything visible)
 	};
 
-	const start = vscode.commands.registerCommand('flash-vscode.start', () => {
+	const start = vscode.commands.registerCommand('flash-vscode.start', async() => {
+		try {
+			await vscode.commands.executeCommand('vim.remap', {
+				after: [ "m", "'" ]
+			});
+			// Without this, Vim might overwrite our new cursor position with its old "post-keypress" state.
+			await new Promise(resolve => setTimeout(resolve, 20));
+		} catch (e) {
+		}
 		updateFlashVscodeMode(flashVscodeModes.active);
 		_start();
 		updateHighlights();
