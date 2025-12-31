@@ -2,6 +2,11 @@
 
 All notable changes to the "flash-vscode" extension will be documented in this file.
 
+## [0.4.41] - 2025-12-31
+
+### Fixed
+- **Vim Jumplist Integration**: Manually register jumps in VSCodeVim's jumplist when jumping, ensuring `''` and `ctrl+o` work as expected.
+
 ## [0.4.40] - 2025-12-26
 
 ### Added
