@@ -26,7 +26,9 @@
 
 ## Overview
 
-**Flash Nvim for VSCode** brings the power of Neovim's most popular navigation plugin, [flash.nvim](https://github.com/folke/flash.nvim), to Visual Studio Code. This extension provides lightning-fast, label-based code navigation that lets you jump to any visible location with just 2-3 keystrokes.
+**Flash Nvim for VSCode** brings the power of Neovim's most popular navigation plugin, [flash.nvim](https://github.com/folke/flash.nvim), to Visual Studio Code. **You do NOT need to know or use Vim to benefit from this extension.** It's designed to be a fast, intuitive, and modern navigation tool for every developer.
+
+This extension provides lightning-fast, label-based code navigation that lets you jump to any visible location with just 2-3 keystrokes.
 
 ### Why Choose Flash Nvim for VSCode?
 
@@ -35,14 +37,14 @@
 - **🔍 Smart Auto-Scroll**: Automatically scrolls to matches when they're outside the visible range
 - **🧠 Smart Symbol & Treesitter Selection**: Instantly select entire functions, blocks, or scopes - turns 10+ keystrokes into 2-3 for daily copy/cut/refactor tasks
 - **🌐 Universal**: Works with [vscode.dev](https://vscode.dev) (VS Code for Web)
-- **👥 For Everyone**: **No Vim knowledge required** - great for all developers
+- **👥 Built for Everyone**: **Absolutely no Vim knowledge required.** While it's inspired by a Neovim plugin, it uses standard VS Code-friendly shortcuts (`Alt+F`) and is designed to be intuitive for every developer, regardless of their editor background.
 - **🔥 Battle-Tested**: Based on Neovim's most loved navigation plugin
 - **🎨 Highly Customizable**: Adjust colors, labels, and behavior to your preference
-- **Vim Jumplist Integration**: Uses VSCodeVim's jumplist when jumping, ensuring `''` and `ctrl+o` work as expected.
+- **🔁 Vim Jumplist Integration**: Uses VSCodeVim's jumplist when jumping, ensuring `''` and `ctrl+o` work as expected.
 
 ### Perfect Alternative To
 
-Looking for alternatives to **EasyMotion**, **Jumpy**, **Jumpy2**, or **AceJump**? **Flash Nvim for VSCode** offers superior performance and a more intuitive label system, making it the best choice for fast code navigation in VS Code.
+Looking for a modern alternative to **EasyMotion**, **Jumpy**, **Jumpy2**, or **AceJump**? **Flash Nvim for VSCode** offers superior performance, a more intuitive label system, and **zero learning curve** for non-Vim users. It's the most efficient way to navigate code in VS Code today.
 
 ## Installation
 
