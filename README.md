@@ -210,12 +210,20 @@ To invoke Flash VSCode commands from VSCodeVim, in your `settings.json`, add ent
 ```json
 "vim.normalModeKeyBindingsNonRecursive": [
   {
-    "before": ["s"],
+    "before": ["f"],
     "commands": ["flash-vscode.start"]
   },
   {
-    "before": ["S"],
+    "before": ["F"],
     "commands": ["flash-vscode.startSelection"]
+  },
+  {
+    "before": ["t"],
+    "commands": ["flash-vscode.jump.treesitterSelection"]
+  },
+  {
+    "before": ["T"],
+    "commands": ["flash-vscode.remoteTreesitterSelection"]
   },
   {
     "before": [ "<BS>" ],
