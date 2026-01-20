@@ -498,15 +498,13 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	// Command to start navigation mode
-	const _start = () => {
-		if (active) { return; };
+	const _start = async () => {
+		if (active) return;
 		active = true;
 		// Set a context key for when-clause usage (for keybindings)
 		vscode.commands.executeCommand('setContext', 'flash-vscode.active', true);
 		// Initial highlight update (just grey out everything visible)
-	};
-
-	const start = vscode.commands.registerCommand('flash-vscode.start', async() => {
+		if (isSelection) return;
 		try {
 			await vscode.commands.executeCommand('vim.remap', {
 				after: [ "m", "'" ]
@@ -515,6 +513,9 @@ export function activate(context: vscode.ExtensionContext) {
 			await new Promise(resolve => setTimeout(resolve, 20));
 		} catch (e) {
 		}
+	};
+
+	const start = vscode.commands.registerCommand('flash-vscode.start', async () => {
 		updateFlashVscodeMode(flashVscodeModes.active);
 		_start();
 		updateHighlights();
