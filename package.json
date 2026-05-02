@@ -72,7 +72,12 @@
         "flash-vscode.dimOpacity": {
           "type": "string",
           "default": "0.65",
-          "description": "Color used to dim text."
+          "description": "Opacity for dimmed (non-match) text."
+        },
+        "flash-vscode.dimColor": {
+          "type": "string",
+          "default": "#666666",
+          "description": "Color for dimmed (non-match) text."
         },
         "flash-vscode.matchColor": {
           "type": "string",
@@ -83,6 +88,11 @@
           "type": "string",
           "default": "bold",
           "description": "Font weight for matched text."
+        },
+        "flash-vscode.enterTargetColor": {
+          "type": "string",
+          "default": "#fd8a2f",
+          "description": "Color for the closest match (Enter target) text."
         },
         "flash-vscode.labelColor": {
           "type": "string",
