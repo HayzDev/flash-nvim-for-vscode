@@ -389,6 +389,8 @@ export function activate(context: vscode.ExtensionContext) {
 			const questionDecorationOptions: vscode.DecorationOptions[] = [];
 			const matchDecorationOption: vscode.DecorationOptions[] = [];
 			const labelPositions: vscode.Position[] = [];
+			// Track the label character for the Enter target (allMatches[0]) so we can render it in orange
+			let enterTargetLabelChar: string | undefined;
 			// set the character before the match to the label character
 			const isActiveEditor = editor === activeEditor;
 			for (const match of allMatches) {
@@ -429,15 +431,22 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 
 				if (char !== '?') {
-					// Store the full range for treesitter-style selection
-					labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
-					labelPositions.push(match.matchStart);
-					decorationOptions.push({
-						range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
-						renderOptions: {
-							before: { contentText: char }
+				// Store the full range for treesitter-style selection
+				labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
+				labelPositions.push(match.matchStart);
+				// If this is the Enter target (allMatches[0]), use orange background
+				const isEnterTarget = match === allMatches[0];
+				decorationOptions.push({
+					range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
+					renderOptions: {
+						before: {
+							contentText: char,
+							color: labelColor,
+							backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
+							fontWeight: labelFontWeight,
 						}
-					});
+					}
+				});
 
 					if (isMode(flashVscodeModes.symbol) && isSelection) {
 						let endPos: vscode.Position | undefined;
@@ -452,15 +461,20 @@ export function activate(context: vscode.ExtensionContext) {
 							}
 						}
 
-						if (endPos && !endPos.isEqual(labelRange.start)) {
-							labelPositions.push(endPos);
-							decorationOptions.push({
-								range: new vscode.Range(endPos.line, endPos.character, endPos.line, endPos.character + 1),
-								renderOptions: {
-									before: { contentText: char }
+					if (endPos && !endPos.isEqual(labelRange.start)) {
+						labelPositions.push(endPos);
+						decorationOptions.push({
+							range: new vscode.Range(endPos.line, endPos.character, endPos.line, endPos.character + 1),
+							renderOptions: {
+								before: {
+									contentText: char,
+									color: labelColor,
+									backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
+									fontWeight: labelFontWeight,
 								}
-							});
-						}
+							}
+						});
+					}
 					}
 				}
 				else {
@@ -503,33 +517,6 @@ export function activate(context: vscode.ExtensionContext) {
 			editor.setDecorations(labelDecoration, decorationOptions);
 			editor.setDecorations(labelDecorationQuestion, questionDecorationOptions);
 			editor.setDecorations(matchDecoration, matchDecorationOption);
-			// Highlight the closest match (Enter target) with a distinct color
-			if (searchQuery.length > 0 && allMatches.length > 0) {
-				const target = allMatches[0];
-				if (target.editor === editor) {
-					let inVisibleRange = false;
-					for (const visibleRange of editor.visibleRanges) {
-						if (target.matchStart.line >= visibleRange.start.line && target.matchStart.line <= visibleRange.end.line) {
-							inVisibleRange = true;
-							break;
-						}
-					}
-					if (inVisibleRange) {
-						editor.setDecorations(enterTargetDecoration, [{
-							range: new vscode.Range(target.matchStart, target.range.end),
-							renderOptions: {
-								before: { contentText: '\u00A0' }
-							}
-						}]);
-					} else {
-						editor.setDecorations(enterTargetDecoration, []);
-					}
-				} else {
-					editor.setDecorations(enterTargetDecoration, []);
-				}
-			} else {
-				editor.setDecorations(enterTargetDecoration, []);
-			}
 
 			if (isMode(flashVscodeModes.selection)) {
 				break;
