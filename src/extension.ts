@@ -416,6 +416,8 @@ export function activate(context: vscode.ExtensionContext) {
 				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
 					// Replace spaces with non-breaking spaces so they render visibly
 					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0'); // Everything except first character
+					// If this is the Enter target (allMatches[0]), color it orange
+					const isEnterTarget = match === allMatches[0];
 
 					matchDecorationOption.push({
 						range: new vscode.Range(
@@ -425,7 +427,12 @@ export function activate(context: vscode.ExtensionContext) {
 							labelRange.end.character
 						),
 						renderOptions: {
-							before: { contentText: overlayText }
+							before: {
+								contentText: overlayText,
+								color: isEnterTarget ? `${enterTargetColor}` : matchColor,
+								fontWeight: matchFontWeight,
+								backgroundColor: isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`,
+							}
 						}
 					});
 				}
