@@ -518,7 +518,7 @@ export function activate(context: vscode.ExtensionContext) {
 						editor.setDecorations(enterTargetDecoration, [{
 							range: new vscode.Range(target.matchStart, target.range.end),
 							renderOptions: {
-								before: { contentText: '' }
+								before: { contentText: '\u00A0' }
 							}
 						}]);
 					} else {
