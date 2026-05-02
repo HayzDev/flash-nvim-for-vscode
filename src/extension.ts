@@ -612,14 +612,17 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		const activeEditor = vscode.window.activeTextEditor;
 		if (activeEditor && allMatches.length > 0) {
-			const cursorPos = activeEditor.selection.active;
-			let target: LocationInfo | undefined;
-			const curPos = relativeVsCodePosition(cursorPos);
-			if (allMatchSortByRelativeDis === undefined || prevSortKey !== searchQuery) {
-				allMatchSortByRelativeDis = allMatches.filter(m => m.editor === activeEditor).sort((a, b) => a.relativeDis - b.relativeDis);
-				prevSortKey = searchQuery;
-			}
+			// Enter jumps to the closest match (allMatches[0], which is already
+			// distance-sorted) and exits — matching flash.nvim behavior.
+			// Shift+Enter cycles through matches in file order within the active editor.
 			if (chr === 'shiftEnter') {
+				const cursorPos = activeEditor.selection.active;
+				let target: LocationInfo | undefined;
+				const curPos = relativeVsCodePosition(cursorPos);
+				if (allMatchSortByRelativeDis === undefined || prevSortKey !== searchQuery) {
+					allMatchSortByRelativeDis = allMatches.filter(m => m.editor === activeEditor).sort((a, b) => a.relativeDis - b.relativeDis);
+					prevSortKey = searchQuery;
+				}
 				if (nextMatchIndex !== undefined) {
 					nextMatchIndex = nextMatchIndex - 1;
 				} else {
@@ -637,18 +640,19 @@ export function activate(context: vscode.ExtensionContext) {
 				if (nextMatchIndex < 0) {
 					nextMatchIndex = allMatchSortByRelativeDis.length - 1;
 				}
-			}
-			else {
-				nextMatchIndex = nextMatchIndex !== undefined ? nextMatchIndex + 1 : allMatchSortByRelativeDis.findIndex(m => m.relativeDis > curPos);
-				// Wrap to beginning if no match found after cursor or if we exceeded the array
-				if (nextMatchIndex < 0 || nextMatchIndex >= allMatchSortByRelativeDis.length) {
-					nextMatchIndex = 0;
+				target = allMatchSortByRelativeDis[ nextMatchIndex! ];
+				if (target) {
+					jump({ editor: target.editor, position: target.matchStart, range: target.range }, true);
+					updateHighlights();
 				}
 			}
-			target = allMatchSortByRelativeDis[ nextMatchIndex! ];
-			if (target) {
-				jump({ editor: target.editor, position: target.matchStart, range: target.range }, true);
-				updateHighlights();
+			else {
+				// Enter: jump to closest match (distance-sorted allMatches[0]) then exit
+				const target = allMatches[0];
+				if (target) {
+					jump({ editor: target.editor, position: target.matchStart, range: target.range }, true);
+					vscode.commands.executeCommand('flash-vscode.exit');
+				}
 			}
 		}
 		else {
