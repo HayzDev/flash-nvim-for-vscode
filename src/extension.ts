@@ -415,7 +415,8 @@ export function activate(context: vscode.ExtensionContext) {
 				// Add match decoration if there's a search query and match has content
 				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
 					// Replace spaces with non-breaking spaces so they render visibly
-					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0'); // Everything except first character
+					// Use \u00A0 fallback so the before pseudo always has width (empty content = zero width = no background)
+					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0') || '\u00A0'; // Everything except first character
 					// If this is the Enter target (allMatches[0]), color it orange
 					const isEnterTarget = match === allMatches[0];
 
