@@ -413,38 +413,32 @@ export function activate(context: vscode.ExtensionContext) {
 				charCounter++;
 
 				// Add match decoration if there's a search query and match has content
-				// Approach: color the full match range with backgroundColor (covers ALL chars incl. char 0),
-				// then add an 'after' pseudo at match end for the label badge
-				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
+				// Approach: the matchDecoration 'before' pseudo renders overlay text (chars 1 to end) in blue.
+				// For allMatches[0], we push an enterTargetDecoration 'before' pseudo in orange that covers it.
+				// Label badge goes AFTER the match text using 'after' pseudo at match end.
+				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
+					// Replace spaces with non-breaking spaces so they render visibly
+					// Use \u00A0 fallback so the before pseudo always has width (empty content = zero width = no background)
+					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0') || '\u00A0';
+					// If this is the Enter target (allMatches[0]), color it orange
 					const isEnterTarget = match === allMatches[0];
-					const bg = isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`;
 
-					// Push match background decoration (full match range, background on the range itself)
 					matchDecorationOption.push({
-						range: labelRange,
-						backgroundColor: bg,
-					});
-
-					// Push label badge 'after' the match text
-					const labelChar = labelCharsToUse[charCounter - 1];
-					if (labelChar !== '?') {
-						matchDecorationOption.push({
-							range: new vscode.Range(
-								labelRange.end.line,
-								labelRange.end.character,
-								labelRange.end.line,
-								labelRange.end.character + 1
-							),
-							renderOptions: {
-								after: {
-									contentText: '\u00A0' + labelChar,
-									color: labelColor,
-									backgroundColor: isEnterTarget ? `${enterTargetColor}ff` : labelBackgroundColor,
-									fontWeight: labelFontWeight,
-								}
+						range: new vscode.Range(
+							labelRange.start.line,
+							labelRange.start.character + 1,
+							labelRange.end.line,
+							labelRange.end.character
+						),
+						renderOptions: {
+							before: {
+								contentText: overlayText,
+								color: isEnterTarget ? `${enterTargetColor}` : matchColor,
+								fontWeight: matchFontWeight,
+								backgroundColor: isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`,
 							}
-						});
-					}
+						}
+					});
 				}
 
 				if (char !== '?') {
@@ -453,8 +447,9 @@ export function activate(context: vscode.ExtensionContext) {
 				labelPositions.push(match.matchStart);
 				// If this is the Enter target (allMatches[0]), use orange background
 				const isEnterTarget = match === allMatches[0];
+				// Label badge goes AFTER the match text (like flash.nvim): range starts at match end
 				decorationOptions.push({
-					range: new vscode.Range(labelRange.end.line, labelRange.end.character - 1, labelRange.end.line, labelRange.end.character),
+					range: new vscode.Range(labelRange.end.line, labelRange.end.character, labelRange.end.line, labelRange.end.character + 1),
 					renderOptions: {
 						after: {
 							contentText: char,
