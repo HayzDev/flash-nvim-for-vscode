@@ -448,30 +448,32 @@ export function activate(context: vscode.ExtensionContext) {
 				// For allMatches[0], 'before' pseudo colors the full match orange.
 				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
 				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
-					// Replace spaces with non-breaking spaces so they render visibly
-					const matchText = searchQuery.replace(/ /g, '\u00A0');
-					// If this is the Enter target (allMatches[0]), color it orange; otherwise keep matchColor (blue)
-					const isEnterTarget = match === allMatches[0];
-					_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} matchText="${matchText}"`);
+					// Use actual document text (preserving original case) for the overlay.
+				// This prevents case mismatch bleed: searching "script" over "SCRIPT" shows
+				// "SCRIPT" in the overlay, not lowercase "script" that would bleed through.
+				const matchText = editor.document.getText(labelRange).replace(/ /g, '\u00A0');
+				// If this is the Enter target (allMatches[0]), color it orange; otherwise keep matchColor (blue)
+				const isEnterTarget = match === allMatches[0];
+				_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} matchText="${matchText}"`);
 
-					// Push a 'before' pseudo covering the FULL match range (start to end)
-					// Actual text is '#00000000' (transparent) so only the pseudo-colored text shows
-					matchDecorationOption.push({
-						range: new vscode.Range(
-							labelRange.start.line,
-							labelRange.start.character,
-							labelRange.end.line,
-							labelRange.end.character
-						),
-						renderOptions: {
-							before: {
-								contentText: matchText,
-								color: isEnterTarget ? `${enterTargetColor}` : matchColor,
-								fontWeight: matchFontWeight,
-								// No backgroundColor → EasyMotion-style: colored text, no background box
-							}
+				// Push a 'before' pseudo covering the FULL match range (start to end)
+				// Actual text is '#00000000' (transparent) so only the pseudo-colored text shows
+				matchDecorationOption.push({
+					range: new vscode.Range(
+						labelRange.start.line,
+						labelRange.start.character,
+						labelRange.end.line,
+						labelRange.end.character
+					),
+					renderOptions: {
+						before: {
+							contentText: matchText,
+							color: isEnterTarget ? `${enterTargetColor}` : matchColor,
+							fontWeight: matchFontWeight,
+							// No backgroundColor → EasyMotion-style: colored text, no background box
 						}
-					});
+					}
+				});
 				}
 
 				if (char !== '?') {
@@ -488,8 +490,8 @@ export function activate(context: vscode.ExtensionContext) {
 						after: {
 							contentText: char,
 							color: isEnterTarget ? labelEnterTargetColor : labelColor,
-							backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
 							fontWeight: labelFontWeight,
+							// No backgroundColor → label is colored text only, no background box
 						}
 					}
 				});
