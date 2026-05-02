@@ -444,9 +444,9 @@ export function activate(context: vscode.ExtensionContext) {
 				// If this is the Enter target (allMatches[0]), use orange background
 				const isEnterTarget = match === allMatches[0];
 				decorationOptions.push({
-					range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
+					range: new vscode.Range(labelRange.end.line, labelRange.end.character - 1, labelRange.end.line, labelRange.end.character),
 					renderOptions: {
-						before: {
+						after: {
 							contentText: char,
 							color: labelColor,
 							backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
