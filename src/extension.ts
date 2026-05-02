@@ -24,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let enterTargetDecoration: vscode.TextEditorDecorationType;
 
 	let dimOpacity: string;
+	let dimColor: string;
 	let matchColor: string;
 	let enterTargetColor: string;
 	let matchFontWeight: string;
@@ -40,6 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const getConfiguration = () => {
 		config = vscode.workspace.getConfiguration('flash-vscode');
 		dimOpacity = config.get<string>('dimOpacity', '0.65');
+		dimColor = config.get<string>('dimColor', '#666666');
 		matchColor = config.get<string>('matchColor', '#3e68d7');
 		enterTargetColor = config.get<string>('enterTargetColor', '#fd8a2f');
 		matchFontWeight = config.get<string>('matchFontWeight', 'bold');
@@ -57,16 +59,16 @@ export function activate(context: vscode.ExtensionContext) {
 			debugStatusItem.color = debugMode ? '#00ff00' : '#888888';
 		}
 
-		dimDecoration = vscode.window.createTextEditorDecorationType({
-			opacity: dimOpacity
-		});
+	dimDecoration = vscode.window.createTextEditorDecorationType({
+		color: dimColor,
+		opacity: dimOpacity
+	});
 	matchDecoration = vscode.window.createTextEditorDecorationType({
 		opacity: '1 !important',
 		color: '#00000000', // Hide the actual text; only the before pseudo shows
 		before: {
 			color: matchColor,
 			fontWeight: matchFontWeight,
-			backgroundColor: `${matchColor}aa`,
 			textDecoration: `none; z-index: 10; position: absolute;`,
 		}
 	});
