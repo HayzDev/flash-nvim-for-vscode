@@ -113,6 +113,11 @@
           "type": "boolean",
           "default": false,
           "description": "Enable debug mode: status bar indicator + console.log at key decision points."
+        },
+        "flash-vscode.labelEnterTargetColor": {
+          "type": "string",
+          "default": "#ffffff",
+          "description": "Text color of the label letter for the Enter target match (the closest match)."
         }
       }
     },

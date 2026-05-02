@@ -32,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let labelQuestionBackgroundColor: string;
 	let labelFontWeight: string;
 	let labelChars: string;
+	let labelEnterTargetColor: string;
 	let caseSensitive: boolean;
 	let debugMode: boolean;
 	let debugStatusItem: vscode.StatusBarItem;
@@ -46,6 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 		labelBackgroundColor = config.get<string>('labelBackgroundColor', '#ff007c');
 		labelQuestionBackgroundColor = config.get<string>('labelQuestionBackgroundColor', '#3E68D7');
 		labelFontWeight = config.get<string>('labelFontWeight', 'bold');
+		labelEnterTargetColor = config.get<string>('labelEnterTargetColor', '#ffffff');
 		// Define the character pool for labels: lowercase, then uppercase, then digits
 		labelChars = config.get<string>('labelKeys', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:\'",.<>/`~\\');
 		caseSensitive = config.get<boolean>('caseSensitive', false);
@@ -439,31 +441,32 @@ export function activate(context: vscode.ExtensionContext) {
 				charCounter++;
 
 				// Add match decoration if there's a search query and match has content
-				// Approach: the matchDecoration 'before' pseudo renders overlay text (chars 1 to end) in blue.
-				// For allMatches[0], we push an enterTargetDecoration 'before' pseudo in orange that covers it.
-				// Label badge goes AFTER the match text using 'after' pseudo at match end.
+				// Approach: EasyMotion-style — actual text made transparent via '#00000000',
+				// 'before' pseudo overlays full match text with colored text (no background).
+				// For allMatches[0], 'before' pseudo colors the full match orange.
 				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
-				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
+				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
 					// Replace spaces with non-breaking spaces so they render visibly
-					// Use \u00A0 fallback so the before pseudo always has width (empty content = zero width = no background)
-					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0') || '\u00A0';
-					// If this is the Enter target (allMatches[0]), color it orange
+					const matchText = searchQuery.replace(/ /g, '\u00A0');
+					// If this is the Enter target (allMatches[0]), color it orange; otherwise keep matchColor (blue)
 					const isEnterTarget = match === allMatches[0];
-					_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} overlay="${overlayText}"`);
+					_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} matchText="${matchText}"`);
 
+					// Push a 'before' pseudo covering the FULL match range (start to end)
+					// Actual text is '#00000000' (transparent) so only the pseudo-colored text shows
 					matchDecorationOption.push({
 						range: new vscode.Range(
 							labelRange.start.line,
-							labelRange.start.character + 1,
+							labelRange.start.character,
 							labelRange.end.line,
 							labelRange.end.character
 						),
 						renderOptions: {
 							before: {
-								contentText: overlayText,
+								contentText: matchText,
 								color: isEnterTarget ? `${enterTargetColor}` : matchColor,
 								fontWeight: matchFontWeight,
-								backgroundColor: isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`,
+								// No backgroundColor → EasyMotion-style: colored text, no background box
 							}
 						}
 					});
@@ -475,13 +478,14 @@ export function activate(context: vscode.ExtensionContext) {
 				labelPositions.push(match.matchStart);
 				// If this is the Enter target (allMatches[0]), use orange background
 				const isEnterTarget = match === allMatches[0];
-				// Label badge goes AFTER the match text (like flash.nvim): range starts at match end
+				// Label badge goes AFTER the match text (like flash.nvim): range ends at match end
+				// so the after pseudo renders flush against the last character of the match
 				decorationOptions.push({
-					range: new vscode.Range(labelRange.end.line, labelRange.end.character, labelRange.end.line, labelRange.end.character + 1),
+					range: new vscode.Range(labelRange.end.line, labelRange.end.character - 1, labelRange.end.line, labelRange.end.character),
 					renderOptions: {
 						after: {
 							contentText: char,
-							color: labelColor,
+							color: isEnterTarget ? labelEnterTargetColor : labelColor,
 							backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
 							fontWeight: labelFontWeight,
 						}
