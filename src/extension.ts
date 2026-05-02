@@ -21,9 +21,11 @@ export function activate(context: vscode.ExtensionContext) {
 	let matchDecoration: vscode.TextEditorDecorationType;
 	let labelDecoration: vscode.TextEditorDecorationType;
 	let labelDecorationQuestion: vscode.TextEditorDecorationType;
+	let enterTargetDecoration: vscode.TextEditorDecorationType;
 
 	let dimOpacity: string;
 	let matchColor: string;
+	let enterTargetColor: string;
 	let matchFontWeight: string;
 	let labelColor: string;
 	let labelBackgroundColor: string;
@@ -36,6 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 		config = vscode.workspace.getConfiguration('flash-vscode');
 		dimOpacity = config.get<string>('dimOpacity', '0.65');
 		matchColor = config.get<string>('matchColor', '#3e68d7');
+		enterTargetColor = config.get<string>('enterTargetColor', '#fd8a2f');
 		matchFontWeight = config.get<string>('matchFontWeight', 'bold');
 		labelColor = config.get<string>('labelColor', '#ffffff');
 		labelBackgroundColor = config.get<string>('labelBackgroundColor', '#ff007c');
@@ -77,6 +80,16 @@ export function activate(context: vscode.ExtensionContext) {
 				contentText: '?',
 				fontWeight: labelFontWeight,
 				textDecoration: `none; z-index: 100; position: absolute;`,
+			}
+		});
+		enterTargetDecoration = vscode.window.createTextEditorDecorationType({
+			opacity: '1 !important',
+			color: '#00000000',
+			before: {
+				color: '#ffffff',
+				fontWeight: 'bold',
+				backgroundColor: `${enterTargetColor}ff`,
+				textDecoration: `none; z-index: 11; position: absolute;`,
 			}
 		});
 
@@ -490,6 +503,33 @@ export function activate(context: vscode.ExtensionContext) {
 			editor.setDecorations(labelDecoration, decorationOptions);
 			editor.setDecorations(labelDecorationQuestion, questionDecorationOptions);
 			editor.setDecorations(matchDecoration, matchDecorationOption);
+			// Highlight the closest match (Enter target) with a distinct color
+			if (searchQuery.length > 0 && allMatches.length > 0) {
+				const target = allMatches[0];
+				if (target.editor === editor) {
+					let inVisibleRange = false;
+					for (const visibleRange of editor.visibleRanges) {
+						if (target.matchStart.line >= visibleRange.start.line && target.matchStart.line <= visibleRange.end.line) {
+							inVisibleRange = true;
+							break;
+						}
+					}
+					if (inVisibleRange) {
+						editor.setDecorations(enterTargetDecoration, [{
+							range: new vscode.Range(target.matchStart, target.range.end),
+							renderOptions: {
+								before: { contentText: '' }
+							}
+						}]);
+					} else {
+						editor.setDecorations(enterTargetDecoration, []);
+					}
+				} else {
+					editor.setDecorations(enterTargetDecoration, []);
+				}
+			} else {
+				editor.setDecorations(enterTargetDecoration, []);
+			}
 
 			if (isMode(flashVscodeModes.selection)) {
 				break;
