@@ -540,7 +540,7 @@ export function activate(context: vscode.ExtensionContext) {
 						contentText: char,
 						color: isEnterTarget ? labelEnterTargetColor : labelColor,
 						fontWeight: labelFontWeight,
-						...(labelBackground ? { backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor } : {}),
+						...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
 					}
 				}
 			});
@@ -567,7 +567,7 @@ export function activate(context: vscode.ExtensionContext) {
 									contentText: char,
 									color: labelColor,
 									fontWeight: labelFontWeight,
-									...(labelBackground ? { backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor } : {}),
+									...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
 								}
 							}
 						});
