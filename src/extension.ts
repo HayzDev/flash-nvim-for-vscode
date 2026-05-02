@@ -126,7 +126,6 @@ export function activate(context: vscode.ExtensionContext) {
 		color: '#00000000',
 		before: {
 			color: labelColor,
-			...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
 			fontWeight: labelFontWeight,
 			textDecoration: `none; z-index: 100; position: absolute;`,
 		}
@@ -241,8 +240,12 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 
 	function itrSymbol(symbols: vscode.DocumentSymbol[], editor: vscode.TextEditor) {
+		const seenPositions: { [key: string]: boolean } = {};
 		for (const symbol of symbols) {
 			const range = symbol.range;
+			const posKey = `${range.start.line}:${range.start.character}`;
+			if (seenPositions[posKey]) { continue; }
+			seenPositions[posKey] = true;
 			allMatches.push({ editor, range: new vscode.Range(range.start, new vscode.Position(range.start.line, range.start.character + symbol.name.length)), matchStart: range.start, relativeDis: relativeVsCodePosition(range.start) });
 			if (symbol.children.length > 0) {
 				itrSymbol(symbol.children, editor);
@@ -274,18 +277,21 @@ export function activate(context: vscode.ExtensionContext) {
 					current = current.parent;
 				}
 
-				// Add ONLY the start position of each range as a label
-				// (not the end — duplicates appear when multiple ranges share the same start)
-				// This gives us boundary markers like flash.nvim's treesitter selection
-				for (const range of ranges) {
-					// Add start position label
-					allMatches.push({
-						editor,
-						range,
-						matchStart: range.start,
-						relativeDis: relativeVsCodePosition(range.start)
-					});
-				}
+			// Deduplicate by start position to prevent duplicate labels when
+			// multiple ranges in the hierarchy share the same start position
+			// (e.g., closing brace `}` that ends multiple nested scopes)
+			const seenPositions: { [key: string]: boolean } = {};
+			for (const range of ranges) {
+				const posKey = `${range.start.line}:${range.start.character}`;
+				if (seenPositions[posKey]) { continue; }
+				seenPositions[posKey] = true;
+				allMatches.push({
+					editor,
+					range,
+					matchStart: range.start,
+					relativeDis: relativeVsCodePosition(range.start)
+				});
+			}
 			}
 		} catch (error) {
 			// Fallback to document symbols if selection range provider is not available
@@ -442,7 +448,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// Decide how many (if any) to label:
 		const totalMatches = allMatches.length;
 		// deduplicate nextChars
-		const allNextChars = [ ...new Set(nextChars) ];
+		const allNextChars = nextChars.filter((c, i, arr) => arr.indexOf(c) === i);
 		// all characters that are in labelChars but not in allNextChars
 		const useableLabelChars = isMode(flashVscodeModes.symbol) ? labelChars.split('') : labelChars.split('').filter(c => !allNextChars.includes(c));
 
@@ -494,7 +500,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// 'before' pseudo overlays full match text with colored text (no background).
 				// For allMatches[0], 'before' pseudo colors the full match orange.
 				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
-				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
+				if (labelRange.end.character > labelRange.start.character) {
 					// Use actual document text (preserving original case) for the overlay.
 				// This prevents case mismatch bleed: searching "script" over "SCRIPT" shows
 				// "SCRIPT" in the overlay, not lowercase "script" that would bleed through.
