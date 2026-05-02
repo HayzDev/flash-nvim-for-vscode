@@ -99,6 +99,11 @@
           "default": "#ffffff",
           "description": "Color used for label text."
         },
+        "flash-vscode.labelBackground": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, labels have a colored background. When false, labels are text only."
+        },
         "flash-vscode.labelBackgroundColor": {
           "type": "string",
           "default": "#ff007c",

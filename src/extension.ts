@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let matchFontWeight: string;
 	let labelColor: string;
 	let labelBackgroundColor: string;
+	let labelBackground: boolean;
 	let labelQuestionBackgroundColor: string;
 	let labelFontWeight: string;
 	let labelChars: string;
@@ -47,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 		matchFontWeight = config.get<string>('matchFontWeight', 'bold');
 		labelColor = config.get<string>('labelColor', '#ffffff');
 		labelBackgroundColor = config.get<string>('labelBackgroundColor', '#ff007c');
+		labelBackground = config.get<boolean>('labelBackground', false);
 		labelQuestionBackgroundColor = config.get<string>('labelQuestionBackgroundColor', '#3E68D7');
 		labelFontWeight = config.get<string>('labelFontWeight', 'bold');
 		labelEnterTargetColor = config.get<string>('labelEnterTargetColor', '#ffffff');
@@ -494,7 +496,7 @@ export function activate(context: vscode.ExtensionContext) {
 						contentText: char,
 						color: isEnterTarget ? labelEnterTargetColor : labelColor,
 						fontWeight: labelFontWeight,
-						// No backgroundColor → label is colored text only, replaces char at position end
+						...(labelBackground ? { backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor } : {}),
 					}
 				}
 			});
@@ -520,8 +522,8 @@ export function activate(context: vscode.ExtensionContext) {
 								before: {
 									contentText: char,
 									color: labelColor,
-									backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor,
 									fontWeight: labelFontWeight,
+									...(labelBackground ? { backgroundColor: isEnterTarget ? `${enterTargetColor}` : labelBackgroundColor } : {}),
 								}
 							}
 						});
