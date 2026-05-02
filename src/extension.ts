@@ -51,16 +51,16 @@ export function activate(context: vscode.ExtensionContext) {
 		dimDecoration = vscode.window.createTextEditorDecorationType({
 			opacity: dimOpacity
 		});
-		matchDecoration = vscode.window.createTextEditorDecorationType({
-			opacity: '1 !important',
-			color: '#00000000', // Make the actual text transparent
-			before: {
-				color: matchColor,
-				fontWeight: matchFontWeight,
-				backgroundColor: `${matchColor}aa`,
-				textDecoration: `none; z-index: 10; position: absolute;`,
-			}
-		});
+	matchDecoration = vscode.window.createTextEditorDecorationType({
+		opacity: '1 !important',
+		color: '#00000000', // Hide the actual text; only the before pseudo shows
+		before: {
+			color: matchColor,
+			fontWeight: matchFontWeight,
+			backgroundColor: `${matchColor}aa`,
+			textDecoration: `none; z-index: 10; position: absolute;`,
+		}
+	});
 		labelDecoration = vscode.window.createTextEditorDecorationType({
 			opacity: '1 !important',
 			color: '#00000000',
@@ -413,29 +413,38 @@ export function activate(context: vscode.ExtensionContext) {
 				charCounter++;
 
 				// Add match decoration if there's a search query and match has content
-				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
-					// Replace spaces with non-breaking spaces so they render visibly
-					// Use \u00A0 fallback so the before pseudo always has width (empty content = zero width = no background)
-					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0') || '\u00A0'; // Everything except first character
-					// If this is the Enter target (allMatches[0]), color it orange
+				// Approach: color the full match range with backgroundColor (covers ALL chars incl. char 0),
+				// then add an 'after' pseudo at match end for the label badge
+				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
 					const isEnterTarget = match === allMatches[0];
+					const bg = isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`;
 
+					// Push match background decoration (full match range, background on the range itself)
 					matchDecorationOption.push({
-						range: new vscode.Range(
-							labelRange.start.line,
-							labelRange.start.character + 1,
-							labelRange.end.line,
-							labelRange.end.character
-						),
-						renderOptions: {
-							before: {
-								contentText: overlayText,
-								color: isEnterTarget ? `${enterTargetColor}` : matchColor,
-								fontWeight: matchFontWeight,
-								backgroundColor: isEnterTarget ? `${enterTargetColor}aa` : `${matchColor}aa`,
-							}
-						}
+						range: labelRange,
+						backgroundColor: bg,
 					});
+
+					// Push label badge 'after' the match text
+					const labelChar = labelCharsToUse[charCounter - 1];
+					if (labelChar !== '?') {
+						matchDecorationOption.push({
+							range: new vscode.Range(
+								labelRange.end.line,
+								labelRange.end.character,
+								labelRange.end.line,
+								labelRange.end.character + 1
+							),
+							renderOptions: {
+								after: {
+									contentText: '\u00A0' + labelChar,
+									color: labelColor,
+									backgroundColor: isEnterTarget ? `${enterTargetColor}ff` : labelBackgroundColor,
+									fontWeight: labelFontWeight,
+								}
+							}
+						});
+					}
 				}
 
 				if (char !== '?') {
