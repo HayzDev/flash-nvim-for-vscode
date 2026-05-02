@@ -500,7 +500,11 @@ export function activate(context: vscode.ExtensionContext) {
 				// 'before' pseudo overlays full match text with colored text (no background).
 				// For allMatches[0], 'before' pseudo colors the full match orange.
 				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
-				if (labelRange.end.character > labelRange.start.character) {
+				// Only apply the enhanced EasyMotion-style match overlay when there's an
+				// actual search query. In tree-sitter mode (searchQuery === ''), skip this
+				// and let the upstream dim+label path handle it — plain labels, no overlay,
+				// no transparent-color tricks that bleed through in tree-sitter context.
+				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
 					// Use actual document text (preserving original case) for the overlay.
 				// This prevents case mismatch bleed: searching "script" over "SCRIPT" shows
 				// "SCRIPT" in the overlay, not lowercase "script" that would bleed through.
