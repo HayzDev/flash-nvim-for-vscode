@@ -274,7 +274,8 @@ export function activate(context: vscode.ExtensionContext) {
 					current = current.parent;
 				}
 
-				// Add both start and end positions of each range as separate labels
+				// Add ONLY the start position of each range as a label
+				// (not the end — duplicates appear when multiple ranges share the same start)
 				// This gives us boundary markers like flash.nvim's treesitter selection
 				for (const range of ranges) {
 					// Add start position label
@@ -831,6 +832,8 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	const handleSymbolSelection = () => {
+		// Exit first to clear any old decorations from previous flash modes
+		vscode.commands.executeCommand('flash-vscode.exit');
 		_start();
 		updateFlashVscodeMode(flashVscodeModes.symbol);
 		// Set selection flag to trigger treesitter-style selection
