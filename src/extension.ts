@@ -33,6 +33,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let labelFontWeight: string;
 	let labelChars: string;
 	let caseSensitive: boolean;
+	let debugMode: boolean;
+	let debugStatusItem: vscode.StatusBarItem;
 
 	const getConfiguration = () => {
 		config = vscode.workspace.getConfiguration('flash-vscode');
@@ -47,6 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
 		// Define the character pool for labels: lowercase, then uppercase, then digits
 		labelChars = config.get<string>('labelKeys', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:\'",.<>/`~\\');
 		caseSensitive = config.get<boolean>('caseSensitive', false);
+		debugMode = config.get<boolean>('debug', false);
+		if (debugStatusItem) {
+			debugStatusItem.text = `flash⚙️ debug:${debugMode ? 'ON' : 'OFF'}`;
+			debugStatusItem.color = debugMode ? '#00ff00' : '#888888';
+		}
 
 		dimDecoration = vscode.window.createTextEditorDecorationType({
 			opacity: dimOpacity
@@ -95,6 +102,23 @@ export function activate(context: vscode.ExtensionContext) {
 
 	};
 	getConfiguration();
+
+	// Create debug status bar item
+	debugStatusItem = vscode.window.createStatusBarItem('flash-vscode.debug', vscode.StatusBarAlignment.Left, 1000);
+	debugStatusItem.text = `flash⚙️ debug:${debugMode ? 'ON' : 'OFF'}`;
+	debugStatusItem.color = debugMode ? '#00ff00' : '#888888';
+	debugStatusItem.tooltip = 'flash-vscode debug mode';
+	debugStatusItem.show();
+
+	const _debugLog = (msg: string, data?: any) => {
+		if (debugMode) {
+			const ts = new Date().toISOString().substr(11, 8);
+			console.log(`[flash:debug ${ts}] ${msg}`, data ?? '');
+			if (debugStatusItem) {
+				debugStatusItem.text = `flash⚙️ ${msg}`;
+			}
+		}
+	};
 
 	function throttle(func: Function, delay: number) {
 		let timeoutId: NodeJS.Timeout | null = null;
@@ -225,6 +249,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if (!active) {
 			return;
 		};
+		_debugLog(`updateHighlights q="${searchQuery}"`);
 
 		if (searchQuery.toLowerCase() !== searchQuery) {
 			caseSensitive = true;
@@ -337,8 +362,9 @@ export function activate(context: vscode.ExtensionContext) {
 				return lineDiff * lineDiff * 1000 + charDiff * charDiff + distanceOffset;
 			}
 
-			// Sort the matches by distance from the cursor.
-			allMatches.sort((a, b) => {
+		// Sort the matches by distance from the cursor.
+		_debugLog(`allMatches sorted: ${allMatches.length} matches`);
+		allMatches.sort((a, b) => {
 				let weight_a = 1;
 				let weight_b = 1;
 				if (a.editor !== activeEditor) {
@@ -416,12 +442,14 @@ export function activate(context: vscode.ExtensionContext) {
 				// Approach: the matchDecoration 'before' pseudo renders overlay text (chars 1 to end) in blue.
 				// For allMatches[0], we push an enterTargetDecoration 'before' pseudo in orange that covers it.
 				// Label badge goes AFTER the match text using 'after' pseudo at match end.
+				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
 				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character + 1) {
 					// Replace spaces with non-breaking spaces so they render visibly
 					// Use \u00A0 fallback so the before pseudo always has width (empty content = zero width = no background)
 					const overlayText = searchQuery.substring(1).replace(/ /g, '\u00A0') || '\u00A0';
 					// If this is the Enter target (allMatches[0]), color it orange
 					const isEnterTarget = match === allMatches[0];
+					_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} overlay="${overlayText}"`);
 
 					matchDecorationOption.push({
 						range: new vscode.Range(
@@ -708,9 +736,10 @@ export function activate(context: vscode.ExtensionContext) {
 		const activeEditor = vscode.window.activeTextEditor;
 		let isVisible = true;
 		if (activeEditor && allMatches.length > 0) {
-			// Since allMatches is sorted with active editor matches first,
-			// check if the first match is from active editor and if it's visible
-			const firstMatch = allMatches[ 0 ];
+		// allMatches is sorted with active editor matches first,
+		// check if the first match is from active editor and if it's visible
+		_debugLog(`enter target: ${allMatches[0] ? `L${allMatches[0].matchStart.line}:C${allMatches[0].matchStart.character}` : 'none'}`);
+		const firstMatch = allMatches[ 0 ];
 
 			if (firstMatch.editor === activeEditor) {
 				isVisible = activeEditor.visibleRanges.some(visibleRange =>
