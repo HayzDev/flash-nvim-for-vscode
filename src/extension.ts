@@ -484,17 +484,20 @@ export function activate(context: vscode.ExtensionContext) {
 				const isEnterTarget = match === allMatches[0];
 				// Label badge goes AFTER the match text (like flash.nvim): range ends at match end
 				// so the after pseudo renders flush against the last character of the match
-				decorationOptions.push({
-					range: new vscode.Range(labelRange.end.line, labelRange.end.character - 1, labelRange.end.line, labelRange.end.character),
-					renderOptions: {
-						after: {
-							contentText: char,
-							color: isEnterTarget ? labelEnterTargetColor : labelColor,
-							fontWeight: labelFontWeight,
-							// No backgroundColor → label is colored text only, no background box
-						}
+			// Label badge goes AFTER the match text (like flash.nvim): range starts at match end
+			// so the before pseudo replaces the character at position 'end' with the label char.
+			// This avoids the 'after' pseudo which renders starting at end-1 (overlaying last char).
+			decorationOptions.push({
+				range: new vscode.Range(labelRange.end.line, labelRange.end.character, labelRange.end.line, labelRange.end.character + 1),
+				renderOptions: {
+					before: {
+						contentText: char,
+						color: isEnterTarget ? labelEnterTargetColor : labelColor,
+						fontWeight: labelFontWeight,
+						// No backgroundColor → label is colored text only, replaces char at position end
 					}
-				});
+				}
+			});
 
 					if (isMode(flashVscodeModes.symbol) && isSelection) {
 						let endPos: vscode.Position | undefined;
