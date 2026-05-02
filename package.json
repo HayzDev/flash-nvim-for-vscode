@@ -106,8 +106,8 @@
         },
         "flash-vscode.labelBackgroundColor": {
           "type": "string",
-          "default": "#ff007c",
-          "description": "Background color for labels."
+          "default": "#222222",
+          "description": "Background color for labels (use IDE background to blend invisible)."
         },
         "flash-vscode.labelQuestionBackgroundColor": {
           "type": "string",

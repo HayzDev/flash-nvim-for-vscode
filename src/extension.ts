@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 		enterTargetColor = config.get<string>('enterTargetColor', '#fd8a2f');
 		matchFontWeight = config.get<string>('matchFontWeight', 'bold');
 		labelColor = config.get<string>('labelColor', '#ffffff');
-		labelBackgroundColor = config.get<string>('labelBackgroundColor', '#ff007c');
+		labelBackgroundColor = config.get<string>('labelBackgroundColor', '#222222');
 		labelBackground = config.get<boolean>('labelBackground', false);
 		labelQuestionBackgroundColor = config.get<string>('labelQuestionBackgroundColor', '#3E68D7');
 		labelFontWeight = config.get<string>('labelFontWeight', 'bold');
