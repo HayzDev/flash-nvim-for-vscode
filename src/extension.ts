@@ -669,7 +669,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const remoteTreesitterSelection = vscode.commands.registerCommand('flash-vscode.remoteTreesitterSelection', () => {
-		updateFlashVscodeMode(flashVscodeModes.active);
+		// Use symbol mode (like handleSymbolSelection) for proper tree-sitter selection
+		// NOT active mode — active mode triggers enhanced EasyMotion overlay which is wrong
+		// for tree-sitter selection. The isRemoteSelection flag handles post-jump behavior.
+		updateFlashVscodeMode(flashVscodeModes.symbol);
 		isRemoteSelection = true;
 		_start();
 		updateHighlights();
