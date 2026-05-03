@@ -914,12 +914,16 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	// Listen to editor scroll/visible range changes to update highlights in real-time
+	// Throttle to 100ms to prevent heap explosion when scrolling through large files
+	// with tree-sitter mode active (q="" triggers symbol fetching across all editors)
 	const visChange = vscode.window.onDidChangeTextEditorVisibleRanges(event => {
 		if (active) {
-			// Recompute highlights (this will use the same searchQuery)
-			updateHighlights();
+			throttledVisChange();
 		}
 	});
+	const throttledVisChange = throttle(() => {
+		updateHighlights();
+	}, 100);
 	const configChangeListener = vscode.workspace.onDidChangeConfiguration(event => {
 		if (event.affectsConfiguration('flash-vscode')) {
 			getConfiguration();
