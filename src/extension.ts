@@ -336,7 +336,11 @@ export function activate(context: vscode.ExtensionContext) {
 				editor.setDecorations(dimDecoration, editor.visibleRanges);
 				editor.setDecorations(labelDecoration, []);
 				editor.setDecorations(labelDecorationQuestion, []);
-				if (isMode(flashVscodeModes.active, flashVscodeModes.selection)) {
+				// In active/selection mode, skip symbol rendering (continue).
+				// BUT if isRemoteSelection is true, we need tree-sitter rendering
+				// even in active mode — remote treesitter uses active mode to
+				// suppress the initial flash overlay, then jump restores tree-sitter.
+				if (isMode(flashVscodeModes.active, flashVscodeModes.selection) && !isRemoteSelection) {
 					continue;
 				}
 			}
@@ -669,10 +673,10 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const remoteTreesitterSelection = vscode.commands.registerCommand('flash-vscode.remoteTreesitterSelection', () => {
-		// Use symbol mode (like handleSymbolSelection) for proper tree-sitter selection
-		// NOT active mode — active mode triggers enhanced EasyMotion overlay which is wrong
-		// for tree-sitter selection. The isRemoteSelection flag handles post-jump behavior.
-		updateFlashVscodeMode(flashVscodeModes.symbol);
+		// Use active mode — the continue at line 339 now allows tree-sitter
+		// rendering when isRemoteSelection is true. We need active mode
+		// so the initial flash search doesn't show overlay labels.
+		updateFlashVscodeMode(flashVscodeModes.active);
 		isRemoteSelection = true;
 		_start();
 		updateHighlights();
