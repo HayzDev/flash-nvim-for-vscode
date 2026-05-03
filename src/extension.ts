@@ -21,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 	let matchDecoration: vscode.TextEditorDecorationType;
 	let labelDecoration: vscode.TextEditorDecorationType;
 	let labelDecorationQuestion: vscode.TextEditorDecorationType;
-	let enterTargetDecoration: vscode.TextEditorDecorationType;
 
 	let dimOpacity: string;
 	let dimColor: string;
@@ -61,25 +60,24 @@ export function activate(context: vscode.ExtensionContext) {
 			debugStatusItem.color = debugMode ? '#00ff00' : '#888888';
 		}
 
-	dimDecoration = vscode.window.createTextEditorDecorationType({
-		color: dimColor,
-		opacity: dimOpacity
-	});
-	matchDecoration = vscode.window.createTextEditorDecorationType({
-		opacity: '1 !important',
-		color: '#00000000', // Hide the actual text; only the before pseudo shows
-		before: {
-			color: matchColor,
-			fontWeight: matchFontWeight,
-			textDecoration: `none; z-index: 10; position: absolute;`,
-		}
-	});
+		dimDecoration = vscode.window.createTextEditorDecorationType({
+			color: dimColor,
+			opacity: dimOpacity
+		});
+		matchDecoration = vscode.window.createTextEditorDecorationType({
+			opacity: '1 !important',
+			color: '#00000000',
+			before: {
+				color: matchColor,
+				fontWeight: matchFontWeight,
+				textDecoration: `none; z-index: 10; position: absolute;`,
+			}
+		});
 		labelDecoration = vscode.window.createTextEditorDecorationType({
 			opacity: '1 !important',
 			color: '#00000000',
 			before: {
 				color: labelColor,
-				...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
 				fontWeight: labelFontWeight,
 				textDecoration: `none; z-index: 100; position: absolute;`,
 			}
@@ -95,62 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
 				textDecoration: `none; z-index: 100; position: absolute;`,
 			}
 		});
-		enterTargetDecoration = vscode.window.createTextEditorDecorationType({
-			opacity: '1 !important',
-			color: '#00000000',
-			before: {
-				color: '#ffffff',
-				fontWeight: 'bold',
-				backgroundColor: `${enterTargetColor}ff`,
-				textDecoration: `none; z-index: 11; position: absolute;`,
-			}
-		});
 	};
-	getConfiguration(); // Read settings BEFORE creating decorations that depend on them
-
-	dimDecoration = vscode.window.createTextEditorDecorationType({
-		color: dimColor,
-		opacity: dimOpacity
-	});
-	matchDecoration = vscode.window.createTextEditorDecorationType({
-		opacity: '1 !important',
-		color: '#00000000', // Hide the actual text; only the before pseudo shows
-		before: {
-			color: matchColor,
-			fontWeight: matchFontWeight,
-			textDecoration: `none; z-index: 10; position: absolute;`,
-		}
-	});
-	labelDecoration = vscode.window.createTextEditorDecorationType({
-		opacity: '1 !important',
-		color: '#00000000',
-		before: {
-			color: labelColor,
-			fontWeight: labelFontWeight,
-			textDecoration: `none; z-index: 100; position: absolute;`,
-		}
-	});
-	labelDecorationQuestion = vscode.window.createTextEditorDecorationType({
-		opacity: '1 !important',
-		color: '#00000000',
-		before: {
-			color: labelColor,
-			backgroundColor: labelQuestionBackgroundColor,
-			contentText: '?',
-			fontWeight: labelFontWeight,
-			textDecoration: `none; z-index: 100; position: absolute;`,
-		}
-	});
-	enterTargetDecoration = vscode.window.createTextEditorDecorationType({
-		opacity: '1 !important',
-		color: '#00000000',
-		before: {
-			color: '#ffffff',
-			fontWeight: 'bold',
-			backgroundColor: `${enterTargetColor}ff`,
-			textDecoration: `none; z-index: 11; position: absolute;`,
-		}
-	});
 
 	// Create debug status bar item
 	debugStatusItem = vscode.window.createStatusBarItem('flash-vscode.debug', vscode.StatusBarAlignment.Left, 1000);
@@ -225,13 +168,13 @@ export function activate(context: vscode.ExtensionContext) {
 		const documentUri = document.uri;
 
 		try {
-			symbols = symbols.length === 0 ? symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+			const docSymbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
 				'vscode.executeDocumentSymbolProvider',
 				documentUri
-			) : symbols;
+			);
 
-			if (symbols) {
-				itrSymbol(symbols, editor);
+			if (docSymbols) {
+				itrSymbol(docSymbols, editor);
 			} else {
 			}
 
