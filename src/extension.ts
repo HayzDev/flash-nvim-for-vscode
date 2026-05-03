@@ -537,7 +537,7 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				}
 
-		if (char !== '?') {
+		if (char !== '?' && char !== undefined) {
 				// Store the full range for treesitter-style selection
 				labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
 
@@ -816,9 +816,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const activeEditor = vscode.window.activeTextEditor;
 		let isVisible = true;
 		if (activeEditor && allMatches.length > 0) {
-		// allMatches is sorted with active editor matches first,
-		// check if the first match is from active editor and if it's visible
-		_debugLog(`enter target: ${allMatches[0] ? `L${allMatches[0].matchStart.line}:C${allMatches[0].matchStart.character}` : 'none'}`);
 		const firstMatch = allMatches[ 0 ];
 
 			if (firstMatch.editor === activeEditor) {
