@@ -533,66 +533,37 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				}
 
-				if (char !== '?') {
+		if (char !== '?') {
 				// Store the full range for treesitter-style selection
 				labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
 				labelPositions.push(match.matchStart);
-				// Label badge goes AFTER the match text (like flash.nvim): range ends at match end
-				// so the after pseudo renders flush against the last character of the match
-			// Label badge goes AFTER the match text (like flash.nvim): range starts at match end
-			// so the before pseudo replaces the character at position 'end' with the label char.
-			// This avoids the 'after' pseudo which renders starting at end-1 (overlaying last char).
-			decorationOptions.push({
-				range: new vscode.Range(labelRange.end.line, labelRange.end.character, labelRange.end.line, labelRange.end.character + 1),
-				renderOptions: {
-					before: {
-						contentText: char,
-						color: isEnterTarget ? labelEnterTargetColor : labelColor,
-						fontWeight: labelFontWeight,
-						...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
-					}
-				}
-			});
-
-					if (isMode(flashVscodeModes.symbol) && isSelection) {
-						let endPos: vscode.Position | undefined;
-						if (labelRange.end.character > 0) {
-							endPos = new vscode.Position(labelRange.end.line, labelRange.end.character - 1);
-						} else {
-							if (labelRange.end.line > 0) {
-								const prevLine = editor.document.lineAt(labelRange.end.line - 1);
-								if (prevLine.text.length > 0) {
-									endPos = new vscode.Position(labelRange.end.line - 1, prevLine.text.length - 1);
-								}
-							}
+				// Label badge goes at the START of the match (labelRange.start.character),
+				// like flash.nvim: the label letter replaces the first character of the match.
+				// Previously this was placed at labelRange.end.character which put labels at
+				// the END of tree-sitter scopes (far from the keyword) and caused out-of-bounds
+				// issues when end.character exceeded line length.
+				decorationOptions.push({
+					range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
+					renderOptions: {
+						before: {
+							contentText: char,
+							color: isEnterTarget ? labelEnterTargetColor : labelColor,
+							fontWeight: labelFontWeight,
+							...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
 						}
-
-					if (endPos && !endPos.isEqual(labelRange.start)) {
-						labelPositions.push(endPos);
-						decorationOptions.push({
-							range: new vscode.Range(endPos.line, endPos.character, endPos.line, endPos.character + 1),
-							renderOptions: {
-								before: {
-									contentText: char,
-									color: labelColor,
-									fontWeight: labelFontWeight,
-									...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
-								}
-							}
-						});
 					}
-					}
-				}
-				else {
-					labelPositions.push(match.matchStart);
-					questionDecorationOptions.push({
-						range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
-						renderOptions: {
+				});
+			}
+			else {
+				labelPositions.push(match.matchStart);
+				questionDecorationOptions.push({
+					range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
+					renderOptions: {
 							before: { contentText: '?' }
 						}
-					});
-				}
+				});
 			}
+		}
 
 			// Create dim ranges excluding label positions
 			const dimRanges: vscode.Range[] = [];
