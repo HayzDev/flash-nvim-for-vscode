@@ -537,38 +537,58 @@ export function activate(context: vscode.ExtensionContext) {
 				// Store the full range for treesitter-style selection
 				labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
 
-				// Label at START of match (replaces first character of keyword, e.g. 'L' in 'Loop')
-				// AND label at END of match (replaces last character, e.g. '}' closing brace).
-				// Both get the same label letter — like flash.nvim ][ labels on both ends.
-				// Use end.character - 1 to target the actual last character of the range
-				// (end.character is one past the last char in VS Code/TS ranges).
-				const endPos = labelRange.end.character > 0 ? labelRange.end.character - 1 : 0;
+				// Tree-sitter mode (searchQuery === ''): labels at BOTH ends of each scope.
+				// Like flash.nvim ][ labels — one at the keyword start, one at the closing brace.
+				// Normal search (searchQuery.length > 0): one label AFTER the match text only.
+				const isTreeSitterMode = searchQuery.length === 0;
 
-				decorationOptions.push({
-					range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
-					renderOptions: {
-						before: {
-							contentText: char,
-							color: isEnterTarget ? labelEnterTargetColor : labelColor,
-							fontWeight: labelFontWeight,
-							...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
+				if (isTreeSitterMode) {
+					// Label at START (replaces first character of keyword, e.g. 'L' in 'Loop')
+					// AND label at END (replaces last character, e.g. '}' closing brace).
+					// Use end.character - 1 to target the actual last character
+					// (end.character is one past the last char in VS Code/TS ranges).
+					const endPos = labelRange.end.character > 0 ? labelRange.end.character - 1 : 0;
+
+					decorationOptions.push({
+						range: new vscode.Range(labelRange.start.line, labelRange.start.character, labelRange.start.line, labelRange.start.character + 1),
+						renderOptions: {
+							before: {
+								contentText: char,
+								color: isEnterTarget ? labelEnterTargetColor : labelColor,
+								fontWeight: labelFontWeight,
+								...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
+							}
 						}
-					}
-				});
-				decorationOptions.push({
-					range: new vscode.Range(labelRange.end.line, endPos, labelRange.end.line, endPos + 1),
-					renderOptions: {
-						before: {
-							contentText: char,
-							color: isEnterTarget ? labelEnterTargetColor : labelColor,
-							fontWeight: labelFontWeight,
-							...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
+					});
+					decorationOptions.push({
+						range: new vscode.Range(labelRange.end.line, endPos, labelRange.end.line, endPos + 1),
+						renderOptions: {
+							before: {
+								contentText: char,
+								color: isEnterTarget ? labelEnterTargetColor : labelColor,
+								fontWeight: labelFontWeight,
+								...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
+							}
 						}
-					}
-				});
-				labelPositions.push(match.matchStart);
-				// Also track the end position for dim range calculation
-				labelPositions.push(new vscode.Position(labelRange.end.line, endPos));
+					});
+					labelPositions.push(match.matchStart);
+					labelPositions.push(new vscode.Position(labelRange.end.line, endPos));
+				} else {
+					// Normal search: label AFTER the match text (replaces the character after the match).
+					// The 'before' pseudo at end.character overlays the character immediately after the match.
+					labelPositions.push(match.matchStart);
+					decorationOptions.push({
+						range: new vscode.Range(labelRange.end.line, labelRange.end.character, labelRange.end.line, labelRange.end.character + 1),
+						renderOptions: {
+							before: {
+								contentText: char,
+								color: isEnterTarget ? labelEnterTargetColor : labelColor,
+								fontWeight: labelFontWeight,
+								...(labelBackground ? { backgroundColor: labelBackgroundColor } : {}),
+							}
+						}
+					});
+				}
 			}
 			else {
 				labelPositions.push(match.matchStart);
