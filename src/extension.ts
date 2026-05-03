@@ -495,23 +495,23 @@ export function activate(context: vscode.ExtensionContext) {
 				let char = labelCharsToUse[ charCounter ];
 				charCounter++;
 
+				// Compute isEnterTarget once: true only when searching (searchQuery.length > 0)
+				// AND this is allMatches[0] (the closest/Enter target).
+				// In tree-sitter mode (searchQuery === ''), isEnterTarget is always false
+				// so both match overlay and label badge use normal colors.
+				const isEnterTarget = searchQuery.length > 0 && match === allMatches[0];
+				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}] isEnterTarget=${isEnterTarget}`);
+
 				// Add match decoration if there's a search query and match has content
 				// Approach: EasyMotion-style — actual text made transparent via '#00000000',
 				// 'before' pseudo overlays full match text with colored text (no background).
-				// For allMatches[0], 'before' pseudo colors the full match orange.
-				_debugLog(`match range=[${labelRange.start.line}:${labelRange.start.character}-${labelRange.end.line}:${labelRange.end.character}]`);
-				// Only apply the enhanced EasyMotion-style match overlay when there's an
-				// actual search query. In tree-sitter mode (searchQuery === ''), skip this
-				// and let the upstream dim+label path handle it — plain labels, no overlay,
-				// no transparent-color tricks that bleed through in tree-sitter context.
+				// For allMatches[0] (isEnterTarget=true), 'before' pseudo colors the full match orange.
 				if (searchQuery.length > 0 && labelRange.end.character > labelRange.start.character) {
 					// Use actual document text (preserving original case) for the overlay.
 				// This prevents case mismatch bleed: searching "script" over "SCRIPT" shows
 				// "SCRIPT" in the overlay, not lowercase "script" that would bleed through.
 				const matchText = editor.document.getText(labelRange).replace(/ /g, '\u00A0');
-				// If this is the Enter target (allMatches[0]), color it orange; otherwise keep matchColor (blue)
-				const isEnterTarget = match === allMatches[0];
-				_debugLog(`  match[${charCounter}] isEnterTarget=${isEnterTarget} matchText="${matchText}"`);
+				_debugLog(`  match[${charCounter}] matchText="${matchText}"`);
 
 				// Push a 'before' pseudo covering the FULL match range (start to end)
 				// Actual text is '#00000000' (transparent) so only the pseudo-colored text shows
@@ -537,8 +537,6 @@ export function activate(context: vscode.ExtensionContext) {
 				// Store the full range for treesitter-style selection
 				labelMap.set(char, { editor: editor, position: match.matchStart, range: match.range });
 				labelPositions.push(match.matchStart);
-				// If this is the Enter target (allMatches[0]), use orange background
-				const isEnterTarget = match === allMatches[0];
 				// Label badge goes AFTER the match text (like flash.nvim): range ends at match end
 				// so the after pseudo renders flush against the last character of the match
 			// Label badge goes AFTER the match text (like flash.nvim): range starts at match end
